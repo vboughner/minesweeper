@@ -17,6 +17,18 @@ class Util {
   /*
    * Creates a new game board of the given size and number of mines.
    * Returns a two-dimensional array of objects that describe the squares.
+   *
+   * Empty square objects in the resulting array look like this:
+   *
+   * {
+   *   isMine: false,
+   *   drawState: Util.COVERED,
+   *   numNearbyMines: 0
+   * }
+   *
+   * numMines squares on the board will be mines, and those near that mine
+   * will have their numNearbyMines count updated. Those squares will have
+   * updated isMine and numNearbyMines values that have been updated.
    */
   static createBoard(width, height, numMines) {
     // create grid of empty squares
@@ -26,7 +38,7 @@ class Util {
       for (let col = 0; col < width; col++) {
         result[row][col] = {
           isMine: false,
-          drawState: Util.COVERED,
+          drawState: Util.DrawStateEnum.COVERED,
           numNearbyMines: 0
         }
       }
@@ -52,7 +64,6 @@ class Util {
     }
     return result;
   }
-
 }
 
 export default Util;

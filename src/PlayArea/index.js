@@ -17,13 +17,23 @@ class PlayArea extends Component {
       height: PlayArea.GRID_HEIGHT,
       numMines: PlayArea.NUM_MINES,
       numFlags: 0,
-      squares: Util.createBoard(Util.GRID_WIDTH, Util.GRID_HEIGHT, Util.NUM_MINES),
+      squares: Util.createBoard(PlayArea.GRID_WIDTH, PlayArea.GRID_HEIGHT, PlayArea.NUM_MINES),
       startTime: Date.now()
     };
   }
 
   handleClick(row, col) {
-    console.log('clicked on row = ' + row + ' and col = ' + col);
+    console.log('left clicked on row = ' + row + ' and col = ' + col);
+  }
+
+  handleContextMenu(row, col) {
+    let currentState = this.state.squares[row][col].drawState;
+    if (currentState === Util.DrawStateEnum.COVERED || currentState === Util.DrawStateEnum.FLAGGED) {
+      let updatedSquares = this.state.squares.slice();
+      updatedSquares[row][col].drawState =
+        currentState === Util.DrawStateEnum.COVERED ? Util.DrawStateEnum.FLAGGED : Util.DrawStateEnum.COVERED;
+      this.setState({squares: updatedSquares});
+    }
   }
 
   render() {
@@ -38,6 +48,7 @@ class PlayArea extends Component {
           height={this.state.height}
           squares={this.state.squares}
           onClick={(row, col) => this.handleClick(row, col)}
+          onContextMenu={(row, col) => this.handleContextMenu(row, col)}
         />
         <Timer
           startTime={this.state.startTime}
