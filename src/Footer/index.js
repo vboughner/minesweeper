@@ -5,7 +5,10 @@ class Footer extends Component {
   render() {
     return (
       <div className="footer">
-          <p>FOOTER</p>
+        <p>
+          Written with React by <a href="https://www.linkedin.com/in/vboughner">Van Boughner</a> (
+          <a href="https://github.com/vboughner/mineswepper">source on github</a>)
+        </p>
       </div>
     );
   }

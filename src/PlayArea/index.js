@@ -22,17 +22,49 @@ class PlayArea extends Component {
     };
   }
 
-  handleClick(row, col) {
-    console.log('left clicked on row = ' + row + ' and col = ' + col);
+  // copies a two-dimensional array of squares, useful before changing the board
+  copySquares(squares) {
+    let updateSquares = [];
+    for (let i = 0; i < squares.length; i++) {
+      updateSquares[i] = squares[i].slice();
+    }
+    return updateSquares;
   }
 
-  handleContextMenu(row, col) {
-    let currentState = this.state.squares[row][col].drawState;
-    if (currentState === Util.DrawStateEnum.COVERED || currentState === Util.DrawStateEnum.FLAGGED) {
-      let updatedSquares = this.state.squares.slice();
-      updatedSquares[row][col].drawState =
-        currentState === Util.DrawStateEnum.COVERED ? Util.DrawStateEnum.FLAGGED : Util.DrawStateEnum.COVERED;
+  // left-click uncovers covered squares, and may result is game win or loss
+  handleClick(row, col) {
+    let squareState = this.state.squares[row][col].drawState;
+    if (squareState === Util.DrawStateEnum.COVERED) {
+      let updatedSquares = this.copySquares(this.state.squares);
+      updatedSquares[row][col].drawState = Util.DrawStateEnum.UNCOVERED;
+
+      // TODO: add logic to determine if more squares should be uncovered
+      // TODO: add logic to determine if game has been won or lost
+
       this.setState({squares: updatedSquares});
+    }
+  }
+
+  // right-click flags the covered squares, unflags flagged squares, and has no effect on uncovered squares
+  handleContextMenu(row, col) {
+    let squareState = this.state.squares[row][col].drawState;
+    if (squareState === Util.DrawStateEnum.COVERED || squareState === Util.DrawStateEnum.FLAGGED) {
+      let updatedSquares = this.copySquares(this.state.squares);
+      let updatedNumFlags = this.state.numFlags;
+
+      if (squareState === Util.DrawStateEnum.COVERED) {
+        updatedSquares[row][col].drawState = Util.DrawStateEnum.FLAGGED;
+        updatedNumFlags++;
+      }
+      else {
+        updatedSquares[row][col].drawState = Util.DrawStateEnum.COVERED;
+        updatedNumFlags--;
+      }
+
+      this.setState({
+        squares: updatedSquares,
+        numFlags: updatedNumFlags
+      });
     }
   }
 

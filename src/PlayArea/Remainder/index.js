@@ -1,14 +1,20 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './index.css';
 
 class Remainder extends Component {
   render() {
     return (
       <div className="remainder">
-          <p>REMAINDER</p>
+          <p>{this.props.numMines - this.props.numFlags}</p>
       </div>
     );
   }
 }
+
+Remainder.propTypes = {
+  numMines: PropTypes.number.isRequired,
+  numFlags: PropTypes.number.isRequired,
+};
 
 export default Remainder;

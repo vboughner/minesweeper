@@ -1,5 +1,7 @@
 .board {
   background-color: lightblue;
+  border-radius: 5px;
+  padding: 3px;
 }
 
 .board-row:after {

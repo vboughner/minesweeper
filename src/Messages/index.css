@@ -1,3 +1,9 @@
 .messages {
-  background-color: mediumslateblue;
+  margin-top: 20px;
+  width: 600px;
+  text-align: center;
+}
+
+.messages p {
+  margin: 0.5em;
 }

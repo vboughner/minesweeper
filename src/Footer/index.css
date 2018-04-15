@@ -1,3 +1,8 @@
 .footer {
-  background-color: palevioletred;
+  font-size: 80%;
+}
+
+.footer a {
+  color: #337ab7;
+  text-decoration: none;
 }
