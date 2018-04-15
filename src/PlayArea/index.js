@@ -29,19 +29,19 @@ class PlayArea extends Component {
   render() {
     return (
       <div className="play-area">
-        <p>START PLAY AREA</p>
         <Remainder
           numMines={this.state.numMines}
           numFlags={this.state.numFlags}
         />
-        <Timer
-          startTime={this.state.startTime}
-        />
         <Board
+          width={this.state.width}
+          height={this.state.height}
           squares={this.state.squares}
           onClick={(row, col) => this.handleClick(row, col)}
         />
-        <p>END PLAY AREA</p>
+        <Timer
+          startTime={this.state.startTime}
+        />
       </div>
     );
   }
