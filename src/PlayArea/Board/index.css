@@ -13,7 +13,6 @@
 .square {
   border: 1px solid cornflowerblue;
   border-radius: 5px;
-  background-color: aliceblue;
   float: left;
   width: 50px;
   height: 50px;
@@ -24,3 +23,22 @@
   line-height: 14px;
 }
 
+.square-covered {
+  background-color: #e3e3e3;
+}
+
+.square-uncovered {
+  background-color: aliceblue;
+}
+
+.square-flagged {
+  background-color: #e3e3e3;
+}
+
+.square-mined {
+  background-color: #e3963c;
+}
+
+.square-exploded {
+  background-color: #f76300;
+}

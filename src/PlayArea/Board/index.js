@@ -3,23 +3,41 @@ import PropTypes from 'prop-types';
 import Util from '../../Util';
 import './index.css';
 
+
 function Square(props) {
   let classNames = 'square';
   let displayText = '';
 
-  if (props.square.drawState === Util.DrawStateEnum.UNCOVERED) {
-    if (props.square.isMine) {
-      displayText = 'M';
-    }
-    else if (props.square.numNearbyMines > 0) {
-      displayText = props.square.numNearbyMines
-    }
-  }
-  else if (props.square.drawState === Util.DrawStateEnum.FLAGGED) {
-    displayText = 'F';
-  }
-  else if (props.square.drawState === Util.DrawStateEnum.EXPLODED) {
-    displayText = 'E';
+  switch (props.square.drawState) {
+    case Util.DrawStateEnum.COVERED:
+      classNames += ' square-covered';
+      break;
+
+    case Util.DrawStateEnum.UNCOVERED:
+      if (props.square.isMine) {
+        classNames += ' square-mined';
+        displayText = 'M';
+      }
+      else {
+        classNames += ' square-uncovered';
+        if (props.square.numNearbyMines > 0) {
+          displayText = props.square.numNearbyMines
+        }
+      }
+      break;
+
+    case Util.DrawStateEnum.FLAGGED:
+      classNames += ' square-flagged';
+      displayText = 'F';
+      break;
+
+    case Util.DrawStateEnum.EXPLODED:
+      classNames += ' square-exploded';
+      displayText = 'E';
+      break;
+
+    default:
+      console.error('error: unknown case for draw state: ' + props.square.drawState);
   }
 
   return (
@@ -28,6 +46,7 @@ function Square(props) {
     </button>
   );
 }
+
 
 class Board extends Component {
   renderSquare(row, col) {
