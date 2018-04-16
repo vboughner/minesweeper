@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Util from '../../Util';
+import 'font-awesome/css/font-awesome.min.css';
 import './index.css';
 
 // colors for text, in the squares near mines
@@ -27,8 +28,7 @@ function Square(props) {
 
     case Util.DrawStateEnum.UNCOVERED:
       if (props.square.isMine) {
-        classNames += ' square-mined';
-        displayText = 'M';
+        classNames += ' square-mined fa fa-bomb';
       }
       else {
         classNames += ' square-uncovered';
@@ -40,13 +40,11 @@ function Square(props) {
       break;
 
     case Util.DrawStateEnum.FLAGGED:
-      classNames += ' square-flagged';
-      displayText = 'F';
+      classNames += ' square-flagged fa fa-flag';
       break;
 
     case Util.DrawStateEnum.EXPLODED:
-      classNames += ' square-exploded';
-      displayText = 'E';
+      classNames += ' square-exploded fa fa-bomb';
       break;
 
     default:

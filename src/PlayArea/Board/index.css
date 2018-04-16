@@ -33,6 +33,7 @@
 
 .square-flagged {
   background-color: #e3e3e3;
+  color: darkslategrey;
 }
 
 .square-mined {
