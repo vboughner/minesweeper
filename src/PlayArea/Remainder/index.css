@@ -6,3 +6,9 @@
   width: 5em;
   text-align: center;
 }
+
+.remainder .small {
+  margin-top: -1.5em;
+  margin-bottom: 1.5em;
+  font-size: 65%;
+}

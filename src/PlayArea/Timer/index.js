@@ -37,7 +37,8 @@ class Timer extends Component {
     let seconds = Math.round(this.state.elapsedMilliseconds / 1000);
     return (
       <div className="timer">
-          <p>{seconds}</p>
+        <p>{seconds}</p>
+        <p className="small">seconds</p>
       </div>
     );
   }

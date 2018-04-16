@@ -6,7 +6,8 @@ class Remainder extends Component {
   render() {
     return (
       <div className="remainder">
-          <p>{this.props.numMines - this.props.numFlags}</p>
+        <p>{this.props.numMines - this.props.numFlags}</p>
+        <p className="small">mines</p>
       </div>
     );
   }
