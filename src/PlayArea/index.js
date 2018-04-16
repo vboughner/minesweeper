@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Remainder from './Remainder';
+import Setup from './Setup';
 import Timer from './Timer';
 import Status from './Status';
 import Board from './Board';
@@ -12,6 +13,7 @@ class PlayArea extends Component {
   static NUM_MINES = 10;
   static REVEAL_DELAY_MS = 30;
   static REVEAL_NUM_MINES = 2;
+  static INITIAL_DIFFICULTY = 2;    // 1 = easy, 2 = medium, 3 = hard
 
   constructor(props) {
     super(props);
@@ -19,12 +21,18 @@ class PlayArea extends Component {
       width: PlayArea.GRID_WIDTH,
       height: PlayArea.GRID_HEIGHT,
       numMines: PlayArea.NUM_MINES,
+      difficulty: PlayArea.INITIAL_DIFFICULTY,
       coveredSafeSquares: PlayArea.GRID_WIDTH * PlayArea.GRID_HEIGHT - PlayArea.NUM_MINES,
       numFlags: 0,
       squares: Util.createBoard(PlayArea.GRID_WIDTH, PlayArea.GRID_HEIGHT, PlayArea.NUM_MINES),
       startTime: null,
       endTime: null
     };
+  }
+
+  // restarts the game, given a new difficulty level
+  restartGame(difficulty) {
+    console.log('restart, difficult is ' + difficulty);
   }
 
   // copies a two-dimensional array of squares, useful before changing the board
@@ -94,20 +102,9 @@ class PlayArea extends Component {
     });
   }
 
-  registerLoss() {
+  endTheGame() {
     this.stopTheClock();
     this.uncoverAllRemainingSquares();
-
-    // TODO: implement status/message/animation for loss
-    console.log('LOST!');
-  }
-
-  registerWin() {
-    this.stopTheClock();
-    this.uncoverAllRemainingSquares();
-
-    // TODO: implement status/message/animation for win
-    console.log('WIN!');
   }
 
   // sets a timeout for uncovering squares from the queue, will uncover a
@@ -125,13 +122,13 @@ class PlayArea extends Component {
           let square = updatedSquares[uncoverNext[i].row][uncoverNext[i].col];
           if (square.isMine) {
             square.drawState = Util.DrawStateEnum.EXPLODED;
-            this.registerLoss();
+            this.endTheGame();
           }
           else {
             square.drawState = Util.DrawStateEnum.UNCOVERED;
             updatedCoveredSafeSquares--;
             if (updatedCoveredSafeSquares === 0) {
-              this.registerWin();
+              this.endTheGame();
             }
           }
         }
@@ -194,10 +191,16 @@ class PlayArea extends Component {
   render() {
     return (
       <div className="play-area">
-        <Remainder
-          numMines={this.state.numMines}
-          numFlags={this.state.numFlags}
-        />
+        <div className="play-area-right">
+          <Remainder
+            numMines={this.state.numMines}
+            numFlags={this.state.numFlags}
+          />
+          <Setup
+            onRestartGame={(difficulty) => this.restartGame(difficulty)}
+            difficulty={this.state.difficulty}
+          />
+        </div>
         <Board
           width={this.state.width}
           height={this.state.height}
