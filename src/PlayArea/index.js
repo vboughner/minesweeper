@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Remainder from './Remainder';
 import Timer from './Timer';
+import Status from './Status';
 import Board from './Board';
 import Util from '../Util';
 import './index.css';
@@ -204,10 +205,17 @@ class PlayArea extends Component {
           onClick={(row, col) => this.handleClick(row, col)}
           onContextMenu={(row, col) => this.handleContextMenu(row, col)}
         />
-        <Timer
-          startTime={this.state.startTime}
-          endTime={this.state.endTime}
-        />
+        <div className="play-area-right">
+          <Timer
+            startTime={this.state.startTime}
+            endTime={this.state.endTime}
+          />
+          <Status
+            coveredSafeSquares={this.state.coveredSafeSquares}
+            startTime={this.state.startTime}
+            endTime={this.state.endTime}
+          />
+        </div>
       </div>
     );
   }

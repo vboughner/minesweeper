@@ -4,3 +4,9 @@
   justify-content: space-around;
   align-items: flex-start;
 }
+
+.play-area-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
