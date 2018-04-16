@@ -37,9 +37,9 @@ class PlayArea extends Component {
       restartState.numMines = 10;
     }
     else {
-      restartState.width = 15;
-      restartState.height = 15;
-      restartState.numMines = 20;
+      restartState.width = 13;
+      restartState.height = 13;
+      restartState.numMines = 35;
     }
     restartState.squares = Util.createBoard(restartState.width, restartState.height, restartState.numMines);
     restartState.coveredSafeSquares = restartState.width * restartState.height - restartState.numMines;
