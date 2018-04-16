@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './index.css';
 
 class Timer extends Component {
@@ -41,5 +42,10 @@ class Timer extends Component {
     );
   }
 }
+
+Timer.propTypes = {
+  startTime: PropTypes.number,
+  endTime: PropTypes.number
+};
 
 export default Timer;

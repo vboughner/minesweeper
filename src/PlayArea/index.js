@@ -9,7 +9,7 @@ class PlayArea extends Component {
   static GRID_WIDTH = 9;
   static GRID_HEIGHT = 9;
   static NUM_MINES = 10;
-  static REVEAL_DELAY_MS = 50;
+  static REVEAL_DELAY_MS = 30;
   static REVEAL_NUM_MINES = 2;
 
   constructor(props) {
@@ -18,6 +18,7 @@ class PlayArea extends Component {
       width: PlayArea.GRID_WIDTH,
       height: PlayArea.GRID_HEIGHT,
       numMines: PlayArea.NUM_MINES,
+      coveredSafeSquares: PlayArea.GRID_WIDTH * PlayArea.GRID_HEIGHT - PlayArea.NUM_MINES,
       numFlags: 0,
       squares: Util.createBoard(PlayArea.GRID_WIDTH, PlayArea.GRID_HEIGHT, PlayArea.NUM_MINES),
       startTime: null,
@@ -41,23 +42,31 @@ class PlayArea extends Component {
     }
   }
 
+  // call this to stop the time when we have won or lost
+  stopTheClock() {
+    this.setState({endTime: Date.now()});
+  }
+
   // adds to a queue of all squares that are unrevealed near the given square,
   // does not repeat the addition of any squares in the queue,
-  // keeps a hash map while generating the queue to quickly check against
+  // keeps a hash map while generating the queue to quickly check against,
+  // note that only COVERED squares should be uncovered, not FLAGGED squares
   addSurroundingSquaresToQueue(squareQueue, squareMap, row, col) {
-    let squareHash = row + ',' + col;
-    if (!this.state.squares[row][col].isMine && !squareMap[squareHash]) {
-      squareQueue.push({
-        row: row,
-        col: col
-      });
-      squareMap[squareHash] = true;
-      if (!this.state.squares[row][col].numNearbyMines) {
-        for (let r = row - 1; r <= row + 1; r++) {
-          if (r >= 0 && r < PlayArea.GRID_HEIGHT) {
-            for (let c = col - 1; c <= col + 1; c++) {
-              if (c >= 0 && c < PlayArea.GRID_WIDTH && (r !== row || c !== col)) {
-                this.addSurroundingSquaresToQueue(squareQueue, squareMap, r, c);
+    if (this.state.squares[row][col].drawState === Util.DrawStateEnum.COVERED) {
+      let squareHash = row + ',' + col;
+      if (!squareMap[squareHash]) {
+        squareQueue.push({
+          row: row,
+          col: col
+        });
+        squareMap[squareHash] = true;
+        if (!this.state.squares[row][col].isMine && !this.state.squares[row][col].numNearbyMines) {
+          for (let r = row - 1; r <= row + 1; r++) {
+            if (r >= 0 && r < PlayArea.GRID_HEIGHT) {
+              for (let c = col - 1; c <= col + 1; c++) {
+                if (c >= 0 && c < PlayArea.GRID_WIDTH && (r !== row || c !== col)) {
+                  this.addSurroundingSquaresToQueue(squareQueue, squareMap, r, c);
+                }
               }
             }
           }
@@ -66,28 +75,80 @@ class PlayArea extends Component {
     }
   }
 
-  // sets a timeout for uncovering squares from the queue, will uncover a certain number
-  // of squares after a time, and set the rest to be uncovered gradually in batches later
+  // uncovers all remaining squares after a win or loss
+  uncoverAllRemainingSquares() {
+    let updatedSquares = this.copySquares(this.state.squares);
+    for (let row = 0; row < PlayArea.GRID_HEIGHT; row++) {
+      for (let col = 0; col < PlayArea.GRID_WIDTH; col++) {
+        let square = updatedSquares[row][col];
+        if (square.drawState === Util.DrawStateEnum.COVERED || square.drawState === Util.DrawStateEnum.FLAGGED) {
+          square.drawState = Util.DrawStateEnum.UNCOVERED;
+        }
+      }
+    }
+    this.setState({
+      squares: updatedSquares,
+      coveredSafeSquares: 0,
+      numFlags: 0
+    });
+  }
+
+  registerLoss() {
+    this.stopTheClock();
+    this.uncoverAllRemainingSquares();
+
+    // TODO: implement status/message/animation for loss
+    console.log('LOST!');
+  }
+
+  registerWin() {
+    this.stopTheClock();
+    this.uncoverAllRemainingSquares();
+
+    // TODO: implement status/message/animation for win
+    console.log('WIN!');
+  }
+
+  // sets a timeout for uncovering squares from the queue, will uncover a
+  // certain number of squares after a time, and set the rest to be
+  // uncovered later (by calling this function again to set a timeout,
+  // repeats until all squares in queue are uncovered)
   setTimeoutForUncovering(squareQueue) {
     if (squareQueue.length > 0) {
       let uncoverNext = squareQueue.slice(0, PlayArea.REVEAL_NUM_MINES);
       let uncoverLater = squareQueue.slice(PlayArea.REVEAL_NUM_MINES);
       setTimeout(() => {
         let updatedSquares = this.copySquares(this.state.squares);
+        let updatedCoveredSafeSquares = this.state.coveredSafeSquares;
         for (let i = 0; i < uncoverNext.length; i++) {
-          updatedSquares[uncoverNext[i].row][uncoverNext[i].col].drawState = Util.DrawStateEnum.UNCOVERED;
+          let square = updatedSquares[uncoverNext[i].row][uncoverNext[i].col];
+          if (square.isMine) {
+            square.drawState = Util.DrawStateEnum.EXPLODED;
+            this.registerLoss();
+          }
+          else {
+            square.drawState = Util.DrawStateEnum.UNCOVERED;
+            updatedCoveredSafeSquares--;
+            if (updatedCoveredSafeSquares === 0) {
+              this.registerWin();
+            }
+          }
         }
-        this.setState({squares: updatedSquares});
-
-        if (uncoverLater) {
-          this.setTimeoutForUncovering(uncoverLater);
-        }
+        this.setState({
+          squares: updatedSquares,
+          coveredSafeSquares: updatedCoveredSafeSquares
+        }, () => {
+          if (uncoverLater) {
+            this.setTimeoutForUncovering(uncoverLater);
+          }
+        });
       }, PlayArea.REVEAL_DELAY_MS);
     }
   }
 
-  // when a square is blank, look to uncover more squares around it, after a time (i.e. animation),
-  // make a list of all the squares to uncover, and then set up an animation to uncover them over time
+  // when a square is blank, look to uncover more squares around it,
+  // after a time (i.e. animation), this function makes a list of all squares
+  // to uncover, then sets up an animation to uncover them over time
   uncoverSurroundingSquaresAfterTime(row, col) {
     let squareQueue = [];
     let squareMap = Object.create(null);
@@ -95,19 +156,13 @@ class PlayArea extends Component {
     this.setTimeoutForUncovering(squareQueue);
   }
 
-  // left-click uncovers covered squares, and may result is game win or loss
+  // left-click uncovers a square, and uncovering may result is game win or loss,
+  // when a square is blank, tries to uncover other non-mine squares around it
   handleClick(row, col) {
     this.startTheClock();
     let squareState = this.state.squares[row][col].drawState;
     if (squareState === Util.DrawStateEnum.COVERED) {
       this.uncoverSurroundingSquaresAfterTime(row, col);
-
-      // TODO: add logic to determine if game has been won or lost
-
-      // TODO: is the following really needed after the uncover surrounding function is called?
-      let updatedSquares = this.copySquares(this.state.squares);
-      updatedSquares[row][col].drawState = Util.DrawStateEnum.UNCOVERED;
-      this.setState({squares: updatedSquares});
     }
   }
 
@@ -151,6 +206,7 @@ class PlayArea extends Component {
         />
         <Timer
           startTime={this.state.startTime}
+          endTime={this.state.endTime}
         />
       </div>
     );
