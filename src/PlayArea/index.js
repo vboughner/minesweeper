@@ -8,31 +8,48 @@ import Util from '../Util';
 import './index.css';
 
 class PlayArea extends Component {
-  static GRID_WIDTH = 9;
-  static GRID_HEIGHT = 9;
-  static NUM_MINES = 10;
   static REVEAL_DELAY_MS = 30;
-  static REVEAL_NUM_MINES = 2;
+  static REVEAL_NUM_SPACES = 2;
   static INITIAL_DIFFICULTY = 2;    // 1 = easy, 2 = medium, 3 = hard
 
   constructor(props) {
     super(props);
-    this.state = {
-      width: PlayArea.GRID_WIDTH,
-      height: PlayArea.GRID_HEIGHT,
-      numMines: PlayArea.NUM_MINES,
-      difficulty: PlayArea.INITIAL_DIFFICULTY,
-      coveredSafeSquares: PlayArea.GRID_WIDTH * PlayArea.GRID_HEIGHT - PlayArea.NUM_MINES,
+    this.state = this.getRestartStateForDifficulty(PlayArea.INITIAL_DIFFICULTY);
+  }
+
+  // gets the state you need for beginning of game
+  getRestartStateForDifficulty(difficulty) {
+    let diff = Number(difficulty);
+    let restartState = {
+      difficulty: diff,
       numFlags: 0,
-      squares: Util.createBoard(PlayArea.GRID_WIDTH, PlayArea.GRID_HEIGHT, PlayArea.NUM_MINES),
       startTime: null,
       endTime: null
     };
+    if (diff === 1) {
+      restartState.width = 5;
+      restartState.height = 5;
+      restartState.numMines = 2;
+    }
+    else if (diff === 2) {
+      restartState.width = 9;
+      restartState.height = 9;
+      restartState.numMines = 10;
+    }
+    else {
+      restartState.width = 15;
+      restartState.height = 15;
+      restartState.numMines = 20;
+    }
+    restartState.squares = Util.createBoard(restartState.width, restartState.height, restartState.numMines);
+    restartState.coveredSafeSquares = restartState.width * restartState.height - restartState.numMines;
+    return restartState;
   }
 
   // restarts the game, given a new difficulty level
   restartGame(difficulty) {
-    console.log('restart, difficult is ' + difficulty);
+    let restartedState = this.getRestartStateForDifficulty(difficulty);
+    this.setState(restartedState);
   }
 
   // copies a two-dimensional array of squares, useful before changing the board
@@ -71,9 +88,9 @@ class PlayArea extends Component {
         squareMap[squareHash] = true;
         if (!this.state.squares[row][col].isMine && !this.state.squares[row][col].numNearbyMines) {
           for (let r = row - 1; r <= row + 1; r++) {
-            if (r >= 0 && r < PlayArea.GRID_HEIGHT) {
+            if (r >= 0 && r < this.state.height) {
               for (let c = col - 1; c <= col + 1; c++) {
-                if (c >= 0 && c < PlayArea.GRID_WIDTH && (r !== row || c !== col)) {
+                if (c >= 0 && c < this.state.width && (r !== row || c !== col)) {
                   this.addSurroundingSquaresToQueue(squareQueue, squareMap, r, c);
                 }
               }
@@ -87,8 +104,8 @@ class PlayArea extends Component {
   // uncovers all remaining squares after a win or loss
   uncoverAllRemainingSquares() {
     let updatedSquares = this.copySquares(this.state.squares);
-    for (let row = 0; row < PlayArea.GRID_HEIGHT; row++) {
-      for (let col = 0; col < PlayArea.GRID_WIDTH; col++) {
+    for (let row = 0; row < this.state.height; row++) {
+      for (let col = 0; col < this.state.width; col++) {
         let square = updatedSquares[row][col];
         if (square.drawState === Util.DrawStateEnum.COVERED || square.drawState === Util.DrawStateEnum.FLAGGED) {
           square.drawState = Util.DrawStateEnum.UNCOVERED;
@@ -113,8 +130,8 @@ class PlayArea extends Component {
   // repeats until all squares in queue are uncovered)
   setTimeoutForUncovering(squareQueue) {
     if (squareQueue.length > 0) {
-      let uncoverNext = squareQueue.slice(0, PlayArea.REVEAL_NUM_MINES);
-      let uncoverLater = squareQueue.slice(PlayArea.REVEAL_NUM_MINES);
+      let uncoverNext = squareQueue.slice(0, PlayArea.REVEAL_NUM_SPACES);
+      let uncoverLater = squareQueue.slice(PlayArea.REVEAL_NUM_SPACES);
       setTimeout(() => {
         let updatedSquares = this.copySquares(this.state.squares);
         let updatedCoveredSafeSquares = this.state.coveredSafeSquares;

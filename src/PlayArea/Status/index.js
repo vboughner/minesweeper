@@ -3,12 +3,9 @@ import PropTypes from 'prop-types';
 import './index.css';
 
 class Status extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     let status = '';
+    let classNames = 'status';
     if (!this.props.startTime) {
       status = <p className="small">ready to start</p>;
     }
@@ -18,14 +15,16 @@ class Status extends Component {
     else {
       if (this.props.coveredSafeSquares === 0) {
         status = <p>You Won!</p>;
+        classNames += ' won';
       }
       else {
         status = <p>You Lost!</p>;
+        classNames += ' lost';
       }
     }
 
     return (
-      <div className="status">
+      <div className={classNames}>
         {status}
       </div>
     );

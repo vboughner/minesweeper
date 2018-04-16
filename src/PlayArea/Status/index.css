@@ -11,3 +11,11 @@
 .status .small {
   font-size: 65%;
 }
+
+.lost {
+  background-color: #e3963c;
+}
+
+.won {
+  background-color: lightgreen;
+}
