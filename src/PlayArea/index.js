@@ -18,7 +18,8 @@ class PlayArea extends Component {
       numMines: PlayArea.NUM_MINES,
       numFlags: 0,
       squares: Util.createBoard(PlayArea.GRID_WIDTH, PlayArea.GRID_HEIGHT, PlayArea.NUM_MINES),
-      startTime: Date.now()
+      startTime: null,
+      endTime: null
     };
   }
 
@@ -31,8 +32,16 @@ class PlayArea extends Component {
     return updateSquares;
   }
 
+  // call this to start the timer as soon as the user clicks for the first time
+  startTheClock() {
+    if (!this.state.startTime) {
+      this.setState({startTime: Date.now()});
+    }
+  }
+
   // left-click uncovers covered squares, and may result is game win or loss
   handleClick(row, col) {
+    this.startTheClock();
     let squareState = this.state.squares[row][col].drawState;
     if (squareState === Util.DrawStateEnum.COVERED) {
       let updatedSquares = this.copySquares(this.state.squares);
@@ -47,6 +56,7 @@ class PlayArea extends Component {
 
   // right-click flags the covered squares, unflags flagged squares, and has no effect on uncovered squares
   handleContextMenu(row, col) {
+    this.startTheClock();
     let squareState = this.state.squares[row][col].drawState;
     if (squareState === Util.DrawStateEnum.COVERED || squareState === Util.DrawStateEnum.FLAGGED) {
       let updatedSquares = this.copySquares(this.state.squares);
