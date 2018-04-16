@@ -3,10 +3,22 @@ import PropTypes from 'prop-types';
 import Util from '../../Util';
 import './index.css';
 
+// colors for text, in the squares near mines
+const numberColors = [
+  'blue',
+  'green',
+  'red',
+  'purple',
+  'darkorange',
+  'brown',
+  'magenta',
+  'darkblue'
+];
 
 function Square(props) {
   let classNames = 'square';
   let displayText = '';
+  let style = {};
 
   switch (props.square.drawState) {
     case Util.DrawStateEnum.COVERED:
@@ -21,7 +33,8 @@ function Square(props) {
       else {
         classNames += ' square-uncovered';
         if (props.square.numNearbyMines > 0) {
-          displayText = props.square.numNearbyMines
+          displayText = props.square.numNearbyMines;
+          style.color = numberColors[props.square.numNearbyMines - 1];
         }
       }
       break;
@@ -41,7 +54,7 @@ function Square(props) {
   }
 
   return (
-    <button className={classNames} onClick={props.onClick} onContextMenu={props.onContextMenu}>
+    <button className={classNames} style={style} onClick={props.onClick} onContextMenu={props.onContextMenu}>
       {displayText}
     </button>
   );
